@@ -1,17 +1,17 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
 
     private static final int SERVER_PORT = 1337;
     private ServerSocket serverSocket;
 
-    private Map<Integer, Socket> clientMap = new HashMap<>();
+    public Set<Socket> activeClients = ConcurrentHashMap.newKeySet();
     private BlockingQueue<String> pingPongQueue = new ArrayBlockingQueue<>(50);
 
     public Server() {
@@ -31,7 +31,7 @@ public class Server {
                 if(socket.isConnected()) {
                     System.out.println("client connected");
                 }
-                clientMap.put(socket.getPort(), socket);
+                activeClients.add(socket);
                 ClientHandler handler = new ClientHandler(socket, pingPongQueue);
                 PingHandler pingHandler = new PingHandler(socket, pingPongQueue);
 
