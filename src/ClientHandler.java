@@ -9,6 +9,7 @@ public class ClientHandler extends Thread {
 
     private Socket client;
     private BlockingQueue<String> queue;
+    private String userName;
 
     public ClientHandler(Socket client, BlockingQueue<String> queue) {
         this.client = client;
@@ -36,16 +37,20 @@ public class ClientHandler extends Thread {
                 
                 if(line.startsWith("HELO")) {
                     //TODO: Username validation
-                    String userHash = hashUsername(line);
+                    userName = line;
+                    String userHash = hashUsername(userName);
                     writer.println("+OK " + userHash);
                     writer.flush();
                 }
+
                 if(line.toLowerCase().startsWith("quit")) {
                     writer.println("+OK Goodbye");
                     writer.flush();
+                    Server.disconnect(client);
                     client.close();
                 }
 
+                Server.sendToAll(line, client, userName);
             }
 
 

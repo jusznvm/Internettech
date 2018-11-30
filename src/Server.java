@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Set;
@@ -11,7 +12,7 @@ public class Server {
     private static final int SERVER_PORT = 1337;
     private ServerSocket serverSocket;
 
-    public Set<Socket> activeClients = ConcurrentHashMap.newKeySet();
+    private static Set<Socket> activeClients = ConcurrentHashMap.newKeySet();
     private BlockingQueue<String> pingPongQueue = new ArrayBlockingQueue<>(50);
 
     public Server() {
@@ -25,10 +26,10 @@ public class Server {
             e.printStackTrace();
         }
 
-        while(true) {
+        while (true) {
             try {
                 Socket socket = serverSocket.accept();
-                if(socket.isConnected()) {
+                if (socket.isConnected()) {
                     System.out.println("client connected");
                 }
                 activeClients.add(socket);
@@ -41,6 +42,30 @@ public class Server {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void sendToAll(String message, Socket socket, String userName) {
+        for (Socket client : activeClients) {
+            try {
+                PrintWriter writer = new PrintWriter(client.getOutputStream());
+
+                //TODO: encode message ?
+                if (client == socket) {
+                    writer.println("+OK BASE64(MD5(BCST " + message + " )");
+                } else {
+                    writer.println(userName + ": " + message);
+                }
+
+                writer.flush();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void disconnect(Socket socket) {
+        activeClients.remove(socket);
     }
 
 }
