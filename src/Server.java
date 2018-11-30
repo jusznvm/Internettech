@@ -11,10 +11,8 @@ public class Server {
     private static final int SERVER_PORT = 1337;
     private ServerSocket serverSocket;
 
-    //TODO: switch for a set? synchronized w/e
     private Map<Integer, Socket> clientMap = new HashMap<>();
     private BlockingQueue<String> pingPongQueue = new ArrayBlockingQueue<>(50);
-
 
     public Server() {
     }
@@ -45,7 +43,4 @@ public class Server {
         }
     }
 
-    public void pingClient() {
-
-    }
 }

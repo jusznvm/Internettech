@@ -4,6 +4,7 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
 public class PingHandler extends Thread {
+
     private Socket client;
     private BlockingQueue<String> queue;
 

@@ -4,7 +4,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.concurrent.BlockingQueue;
-import java.util.regex.Pattern;
 
 public class ClientHandler extends Thread {
 
@@ -25,7 +24,6 @@ public class ClientHandler extends Thread {
             writer.println("HELO");
             writer.flush();
 
-
             BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             while (true) {
@@ -35,12 +33,19 @@ public class ClientHandler extends Thread {
                 if (line.toLowerCase().contains("pong")) {
                     queue.put(line);
                 }
+                
                 if(line.startsWith("HELO")) {
                     //TODO: Username validation
                     String userHash = hashUsername(line);
                     writer.println("+OK " + userHash);
                     writer.flush();
                 }
+                if(line.toLowerCase().startsWith("quit")) {
+                    writer.println("+OK Goodbye");
+                    writer.flush();
+                    client.close();
+                }
+
             }
 
 
@@ -53,6 +58,7 @@ public class ClientHandler extends Thread {
         byte[] bytes = userName.getBytes("UTF-8");
         MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] digested = md.digest(bytes);
+
         return new String(Base64.getEncoder().encode(digested));
     }
 
