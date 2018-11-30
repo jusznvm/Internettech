@@ -18,10 +18,10 @@ public class PingHandler extends Thread {
             PrintWriter writer = new PrintWriter(client.getOutputStream());
 
             while (true) {
+                sleep(60000);
                 writer.println("PING");
                 writer.flush();
                 queue.take();
-                sleep(60000);
             }
 
         } catch (IOException | InterruptedException e) {

@@ -1,9 +1,10 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
 
 public class ClientHandler extends Thread {
 
@@ -17,20 +18,42 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
+
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
             PrintWriter writer = new PrintWriter(client.getOutputStream());
+
+            writer.println("HELO");
+            writer.flush();
+
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             while (true) {
                 String line = reader.readLine();
+                System.out.println("read input: " + line);
+
                 if (line.toLowerCase().contains("pong")) {
                     queue.put(line);
+                }
+                if(line.startsWith("HELO")) {
+                    //TODO: Username validation
+                    String userHash = hashUsername(line);
+                    writer.println("+OK " + userHash);
+                    writer.flush();
                 }
             }
 
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
+
+    public String hashUsername(String userName) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        byte[] bytes = userName.getBytes("UTF-8");
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] digested = md.digest(bytes);
+        return new String(Base64.getEncoder().encode(digested));
+    }
+
 }
