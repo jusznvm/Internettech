@@ -13,7 +13,6 @@ public class Server {
     private ServerSocket serverSocket;
 
     private static Set<Socket> activeClients = ConcurrentHashMap.newKeySet();
-    private BlockingQueue<String> pingPongQueue = new ArrayBlockingQueue<>(50);
 
     public Server() {
     }
@@ -33,6 +32,8 @@ public class Server {
                     System.out.println("client connected");
                 }
                 activeClients.add(socket);
+
+                BlockingQueue<String> pingPongQueue = new ArrayBlockingQueue<>(50);
                 ClientHandler handler = new ClientHandler(socket, pingPongQueue);
                 PingHandler pingHandler = new PingHandler(socket, pingPongQueue);
 

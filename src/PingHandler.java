@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class PingHandler extends Thread {
 
@@ -22,7 +23,8 @@ public class PingHandler extends Thread {
                 sleep(60000);
                 writer.println("PING");
                 writer.flush();
-                queue.take();
+                if (queue.poll(3, TimeUnit.SECONDS) == null)
+                    client.close();
             }
 
         } catch (IOException | InterruptedException e) {
