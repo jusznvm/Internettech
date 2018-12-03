@@ -36,17 +36,29 @@ public class ClientHandler extends Thread {
                 }
                 
                 if(line.startsWith("HELO")) {
-                    //TODO: Username validation
                     userName = line;
-                    String userHash = hashUsername(userName);
-                    writer.println("+OK " + userHash);
-                    writer.flush();
+                    if(Utils.validateUsername(userName)) {
+                        if(Utils.nameIsUsed(userName)) {
+                            writer.println("-ERR user already logged in");
+                            writer.flush();
+                        } else {
+                            Utils.addUserName(userName);
+                            String userHash = Utils.hashMessage(userName);
+                            writer.println("+OK " + userHash);
+                            writer.flush();
+                        }
+                    } else {
+                        writer.println("-ERR username has an invalid format");
+                        writer.flush();
+                    }
+
                 }
 
                 if(line.toLowerCase().startsWith("quit")) {
                     writer.println("+OK Goodbye");
                     writer.flush();
                     Server.disconnect(client);
+                    Utils.removeUsername(userName);
                     client.close();
                 }
 
@@ -57,14 +69,6 @@ public class ClientHandler extends Thread {
         } catch (IOException | InterruptedException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-    }
-
-    public String hashUsername(String userName) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        byte[] bytes = userName.getBytes("UTF-8");
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        byte[] digested = md.digest(bytes);
-
-        return new String(Base64.getEncoder().encode(digested));
     }
 
 }

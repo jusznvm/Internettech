@@ -23,8 +23,10 @@ public class PingHandler extends Thread {
                 sleep(60000);
                 writer.println("PING");
                 writer.flush();
-                if (queue.poll(3, TimeUnit.SECONDS) == null)
+                if (queue.poll(3, TimeUnit.SECONDS) == null) {
+                    writer.println("DSCN Pong timeout");
                     client.close();
+                }
             }
 
         } catch (IOException | InterruptedException e) {

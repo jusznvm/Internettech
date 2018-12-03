@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -50,16 +52,16 @@ public class Server {
             try {
                 PrintWriter writer = new PrintWriter(client.getOutputStream());
 
-                //TODO: encode message ?
                 if (client == socket) {
-                    writer.println("+OK BASE64(MD5(BCST " + message + " )");
+                    String hashedMessage = Utils.hashMessage(message);
+                    writer.println("+OK BASE64(MD5(BCST " + hashedMessage + " )");
                 } else {
                     writer.println(userName + ": " + message);
                 }
 
                 writer.flush();
 
-            } catch (IOException e) {
+            } catch (IOException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
         }
@@ -68,5 +70,6 @@ public class Server {
     public static void disconnect(Socket socket) {
         activeClients.remove(socket);
     }
+
 
 }
