@@ -56,7 +56,7 @@ public class Server {
                     String hashedMessage = Utils.hashMessage(message);
                     writer.println("+OK BASE64(MD5(BCST " + hashedMessage + " )");
                 } else {
-                    writer.println(userName + ": " + message);
+                    writer.println("BCST " + userName + ": " + message);
                 }
 
                 writer.flush();
@@ -70,6 +70,4 @@ public class Server {
     public static void disconnect(Socket socket) {
         activeClients.remove(socket);
     }
-
-
 }
