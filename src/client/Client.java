@@ -30,3 +30,11 @@ public class Client {
         }
     }
 }
+
+
+// do lees socket, while er berichten zijn
+// niet in 1 thread, keyboard input lezen & network input. Dus 2 verschillende threads ervoor
+// client heeft dus 2 threads.
+
+// keyboard:
+// bufferedreader = new inputstreamreader(inputStream in)

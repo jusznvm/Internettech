@@ -9,5 +9,12 @@ public enum MessageType {
     DSCN,
     OK,
     ERR,
-    UNKNOWN;
+    UNKNOWN,
+    USERS,
+    MKGROUP,
+    GETGROUPS,
+    JOIN,
+    SHOUT,
+    LEAVE,
+    KICK;
 }
