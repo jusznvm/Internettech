@@ -1,3 +1,8 @@
+package server;
+
+import server.Server;
+import utils.Utils;
+
 import java.io.*;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
@@ -50,6 +55,11 @@ public class ClientHandler extends Thread {
                         writer.flush();
                     }
 
+                }
+
+                if(line.startsWith("getall")) {
+                    writer.println("testetst");
+                    writer.flush();
                 }
 
                 if(line.toLowerCase().startsWith("quit")) {
