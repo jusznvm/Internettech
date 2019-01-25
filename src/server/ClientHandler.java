@@ -57,7 +57,7 @@ public class ClientHandler extends Thread {
 
                 }
 
-                if(line.startsWith("getall")) {
+                if(line.toLowerCase().startsWith("dm")) {
                     writer.println("testetst");
                     writer.flush();
                 }

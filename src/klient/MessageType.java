@@ -1,4 +1,4 @@
-package client;
+package klient;
 
 public enum MessageType {
     HELO,
@@ -7,6 +7,7 @@ public enum MessageType {
     QUIT,
     PING,
     DSCN,
+    DM,
     OK,
     ERR,
     UNKNOWN,

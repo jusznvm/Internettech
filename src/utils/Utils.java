@@ -1,5 +1,9 @@
 package utils;
 
+import client.ClientMessage;
+import klient.MessageType;
+import client.ServerMessage;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -42,4 +46,18 @@ public class Utils {
         usedNames.remove(userName);
     }
 
+    public static boolean validateServerMessage(final ClientMessage clientMessage, final ServerMessage serverMessage) {
+        boolean isValid = false;
+        try {
+            final byte[] hash = MessageDigest.getInstance("MD5").digest(clientMessage.toString().getBytes());
+            final String encodedHash = new String(Base64.getEncoder().encode(hash));
+            if (serverMessage.getMessageType().equals(MessageType.OK) && encodedHash.equals(serverMessage.getPayload())) {
+                isValid = true;
+            }
+        }
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return isValid;
+    }
 }

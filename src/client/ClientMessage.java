@@ -1,5 +1,7 @@
 package client;
 
+import klient.MessageType;
+
 public class ClientMessage {
     private MessageType type;
     private String line;
@@ -11,6 +13,10 @@ public class ClientMessage {
 
     @Override
     public String toString() {
-        return type + ": " + line;
+        return type + " " + line;
+    }
+
+    public MessageType getType() {
+        return type;
     }
 }

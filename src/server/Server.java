@@ -40,10 +40,10 @@ public class Server {
 
                 BlockingQueue<String> pingPongQueue = new ArrayBlockingQueue<>(50);
                 ClientHandler handler = new ClientHandler(socket, pingPongQueue);
-                PingHandler pingHandler = new PingHandler(socket, pingPongQueue);
+                //PingHandler pingHandler = new PingHandler(socket, pingPongQueue);
 
                 handler.start();
-                pingHandler.start();
+                // pingHandler.start();
             } catch (IOException e) {
                 e.printStackTrace();
             }
