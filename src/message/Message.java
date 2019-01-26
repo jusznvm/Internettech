@@ -1,20 +1,12 @@
 package message;
 
-import message.type.Broadcast;
-import message.type.DirectMessage;
-import message.type.Helo;
-import message.type.Quit;
-
 public class Message {
     private MessageType messageType;
-    private String type;
     private String payload;
 
     public Message(String type, String payload) {
-        this.type = type;
         this.payload = payload;
-
-        setMessageType(type);
+        this.messageType = setMessageType(type);
     }
 
     public void setPayload(String payload) {
@@ -34,24 +26,11 @@ public class Message {
         return messageType + " " + payload;
     }
 
-    public Message handleMessage() {
-        switch(messageType) {
-            case HELO:
-                return Helo.handleServerMessage(payload);
-            case BCST:
-                return Broadcast.handleServerMessage(payload);
-            case DM:
-                return DirectMessage.handleServerMessage(payload);
-            case QUIT:
-                return Quit.handleServerMessage(payload);
-        }
-        return null;
-    }
-
-    private void setMessageType(String type) {
+    private MessageType setMessageType(String type) {
         for (MessageType t : MessageType.values()) {
             if (t.toString().equalsIgnoreCase(type))
-                this.messageType = t;
+                return t;
         }
+        return null;
     }
 }

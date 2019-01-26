@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread {
     private Socket socket;
-    private int serverPort = 4444;
+    private int serverPort = 1337;
 
     public LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
@@ -73,7 +73,7 @@ public class Client extends Thread {
 //                    msg.handleMessage();
 
 
-                } while (reader.readLine() != null);
+                } while (true);
 
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();

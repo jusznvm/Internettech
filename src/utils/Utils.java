@@ -3,12 +3,15 @@ package utils;
 import client.ClientMessage;
 import message.MessageType;
 import client.ServerMessage;
+import server.Server;
 
 import java.io.UnsupportedEncodingException;
+import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,5 +61,23 @@ public class Utils {
             e.printStackTrace();
         }
         return isValid;
+    }
+
+    public static Map.Entry<Socket, String> findUserFromActiveClients(String user){
+        for (Map.Entry<Socket, String> entry : Server.activeClients.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(user)) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    public static Map.Entry<Socket, String> findUserFromActiveClients(Socket user){
+        for (Map.Entry<Socket, String> entry : Server.activeClients.entrySet()) {
+            if (entry.getKey().equals(user)) {
+                return entry;
+            }
+        }
+        return null;
     }
 }

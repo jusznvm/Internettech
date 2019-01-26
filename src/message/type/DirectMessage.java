@@ -2,6 +2,7 @@ package message.type;
 
 import message.Message;
 import server.Server;
+import utils.Utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,23 +14,31 @@ public class DirectMessage extends Message {
         super(type, payload);
     }
 
-    //TODO: origin user moet vermeld worden bij de dm
-    public static Message handleServerMessage(String payload) {
+    public static Message handleServerMessage(String payload, Socket origin) {
         String recipient = payload.split(" ", 2)[0];
         String dm = payload.split(" ", 2)[1];
-        Socket socket = null;
+        Socket recipientSocket = null;
 
-        for (Map.Entry<Socket, String> entry : Server.activeClients.entrySet()) {
-            if (entry.getValue().equalsIgnoreCase(recipient)) {
-                socket = entry.getKey();
-            }
-        }
+        Map.Entry<Socket, String> recipientMap = Utils.findUserFromActiveClients(recipient);
+        String senderUserName = Utils.findUserFromActiveClients(origin).getValue();
 
         try {
-            assert socket != null;
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
+            PrintWriter writer = new PrintWriter(origin.getOutputStream());
 
-            writer.println("");
+            if (Server.activeClients.containsValue(recipient)) {
+                recipientSocket = recipientMap.getKey();
+                PrintWriter rWriter = new PrintWriter(recipientSocket.getOutputStream());
+
+                rWriter.println("dm from " + senderUserName + ": " + dm);
+                rWriter.flush();
+
+                writer.println("OK successfully dm'd!");
+
+            } else {
+                writer.println("ERR User not found!");
+            }
+
+            writer.flush();
 
         } catch (IOException e) {
             e.printStackTrace();

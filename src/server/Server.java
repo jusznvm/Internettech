@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
 
-    private static final int SERVER_PORT = 4444;
+    private static final int SERVER_PORT = 1337;
     private ServerSocket serverSocket;
 
     public static Map<Socket, String> activeClients = new ConcurrentHashMap<>();

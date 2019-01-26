@@ -3,6 +3,10 @@ package server;
 import client.ClientInfo;
 import message.Message;
 import message.MessageType;
+import message.type.Broadcast;
+import message.type.DirectMessage;
+import message.type.Helo;
+import message.type.Quit;
 import server.Server;
 import utils.Utils;
 
@@ -16,18 +20,18 @@ public class ClientHandler extends Thread {
     private Socket client;
     private BlockingQueue<String> queue;
 
+    private PrintWriter writer;
+
     public ClientHandler(Socket client, BlockingQueue<String> queue) {
         this.client = client;
         this.queue = queue;
     }
 
-
-    //TODO: iets met ClientInfo doen (:
     @Override
     public void run() {
 
         try {
-            PrintWriter writer = new PrintWriter(client.getOutputStream());
+            writer = new PrintWriter(client.getOutputStream());
             BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             writer.println("HELO");
@@ -43,14 +47,13 @@ public class ClientHandler extends Thread {
                 Message message = new Message(messageType, payLoad);
 
                 if (message.getMessageType().equals(MessageType.HELO)) {
-                    Server.activeClients.put(client, payLoad);
-                    ClientInfo clientInfo = new ClientInfo(client, payLoad);
+                    Server.activeClients.replace(client, payLoad);
                 }
 
-                Message response = message.handleMessage();
+                handleMessage(message);
 
-                writer.println(response.toString());
-                writer.flush();
+//                writer.println(response.toString());
+//                writer.flush();
 
 
 //
@@ -98,6 +101,31 @@ public class ClientHandler extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    
+    private void handleMessage(Message message) {
+        MessageType messageType = message.getMessageType();
+        String payload = message.getPayload();
+
+        switch(messageType) {
+            case HELO:
+                Message msg = Helo.handleServerMessage(payload);
+                writer.println(msg);
+                break;
+            case BCST:
+                Broadcast.handleServerMessage(payload, client);
+                break;
+            case DM:
+                DirectMessage.handleServerMessage(payload, client);
+                break;
+            case QUIT:
+                Quit.handleServerMessage(payload);
+                break;
+        }
+
+        writer.flush();
+
     }
 
 }

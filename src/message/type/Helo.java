@@ -1,20 +1,18 @@
 package message.type;
 
 import message.Message;
-import message.MessageType;
-import server.Server;
 import utils.Utils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
 public class Helo extends Message {
-    private final static MessageType messageType = MessageType.HELO;
 
     public Helo(String type, String payload) {
         super(type, payload);
     }
 
+    //TODO: HELO mag alleen verstuurt worden zolang de client nog niet geaccepteerd is
     public static Message handleServerMessage(String payload) {
         Message msg;
 
