@@ -24,7 +24,7 @@ public class Broadcast extends Message {
                     String hashedMessage = Utils.hashMessage(payload);
                     writer.println("+OK BASE64(MD5(BCST " + hashedMessage + ")");
                 } else {
-                    writer.println("BCST " + entry.getUserName() + ": " + payload);
+                    writer.println("BCST " + origin.getUserName() + ": " + payload);
                 }
 
                 writer.flush();

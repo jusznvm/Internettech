@@ -12,6 +12,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,5 +81,17 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    public static List<ClientInfo> getGroup(String groupName) {
+        return Server.activeGroups.get(groupName);
+    }
+
+    public static boolean isPartOfGroup(List<ClientInfo> group, String user) {
+        for (ClientInfo info : group) {
+            if (info.getUserName().equals(user))
+                return true;
+        }
+        return false;
     }
 }

@@ -92,6 +92,15 @@ public class ClientHandler extends Thread {
             case JOIN:
                 Join.handleServerMessage(payload, clientInfo);
                 break;
+            case KICK:
+                Kick.handleServerMessage(payload, clientInfo);
+                break;
+            case SHOUT:
+                Shout.handleServerMessage(payload, clientInfo);
+                break;
+            case LEAVE:
+                Leave.handleServerMessage(payload, clientInfo);
+                break;
             case QUIT:
                 Quit.handleServerMessage(clientInfo);
                 break;

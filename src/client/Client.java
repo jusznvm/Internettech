@@ -115,16 +115,19 @@ public class Client extends Thread {
 
                     if (msg != null && msg.getMessageType().equals(MessageType.HELO)) {
                         msg = messages.take();
-
                         msg.setPayload(line);
+
                     } else if (containsMessageType(line)) {
                         String messageType = line.contains(" ") ? line.split(" ")[0] : line;
-                        String payLoad = line.split(" ", 2)[1];
+                        String payLoad = "";
+
+                        if (line.split(" ").length >= 2)
+                            payLoad = line.split(" ", 2)[1];
 
                         msg = new Message(messageType, payLoad);
-                    } else {
+
+                    } else
                         msg = new Message("BCST", line);
-                    }
 
                     writer.println(msg.toString());
                     writer.flush();
