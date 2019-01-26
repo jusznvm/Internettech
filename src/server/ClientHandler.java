@@ -3,10 +3,7 @@ package server;
 import client.ClientInfo;
 import message.Message;
 import message.MessageType;
-import message.type.Broadcast;
-import message.type.DirectMessage;
-import message.type.Helo;
-import message.type.Quit;
+import message.type.*;
 import server.Server;
 import utils.Utils;
 
@@ -116,11 +113,17 @@ public class ClientHandler extends Thread {
             case BCST:
                 Broadcast.handleServerMessage(payload, client);
                 break;
+            case USERS:
+                Users.handleServerMessage(client);
             case DM:
                 DirectMessage.handleServerMessage(payload, client);
                 break;
+            case GETGROUPS:
+                GetGroups.handleServerMessage(client);
+            case MKGROUP:
+                MakeGroup.handleServerMessage(payload, client);
             case QUIT:
-                Quit.handleServerMessage(payload);
+                Quit.handleServerMessage(client);
                 break;
         }
 

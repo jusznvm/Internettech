@@ -19,6 +19,8 @@ public class Client extends Thread {
         new Client().start();
     }
 
+
+    //TODO close client if server confirmed quit message with goodbye
     public void start() {
         try {
             this.socket = new Socket(InetAddress.getLocalHost(), serverPort);

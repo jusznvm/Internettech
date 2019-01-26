@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -19,6 +20,7 @@ public class Server {
     private ServerSocket serverSocket;
 
     public static Map<Socket, String> activeClients = new ConcurrentHashMap<>();
+    public static Map<String, List<String>> activeGroups = new ConcurrentHashMap<>();
 
     public Server() {
     }
