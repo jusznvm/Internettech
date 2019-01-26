@@ -1,5 +1,6 @@
 package utils;
 
+import client.ClientInfo;
 import client.ClientMessage;
 import message.MessageType;
 import client.ServerMessage;
@@ -63,18 +64,18 @@ public class Utils {
         return isValid;
     }
 
-    public static Map.Entry<Socket, String> findUserFromActiveClients(String user){
-        for (Map.Entry<Socket, String> entry : Server.activeClients.entrySet()) {
-            if (entry.getValue().equalsIgnoreCase(user)) {
+    public static ClientInfo findUserFromActiveClients(String user){
+        for (ClientInfo entry : Server.activeClients) {
+            if (entry.getUserName().equalsIgnoreCase(user)) {
                 return entry;
             }
         }
         return null;
     }
 
-    public static Map.Entry<Socket, String> findUserFromActiveClients(Socket user){
-        for (Map.Entry<Socket, String> entry : Server.activeClients.entrySet()) {
-            if (entry.getKey().equals(user)) {
+    public static ClientInfo findUserFromActiveClients(Socket user){
+        for (ClientInfo entry : Server.activeClients) {
+            if (entry.getSocket().equals(user)) {
                 return entry;
             }
         }

@@ -4,12 +4,9 @@ import client.ClientInfo;
 import message.Message;
 import message.MessageType;
 import message.type.*;
-import server.Server;
-import utils.Utils;
 
 import java.io.*;
 import java.net.Socket;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.BlockingQueue;
 
 public class ClientHandler extends Thread {
@@ -18,6 +15,9 @@ public class ClientHandler extends Thread {
     private BlockingQueue<String> queue;
 
     private PrintWriter writer;
+
+    private boolean isValidated = false;
+    private ClientInfo clientInfo;
 
     public ClientHandler(Socket client, BlockingQueue<String> queue) {
         this.client = client;
@@ -43,14 +43,16 @@ public class ClientHandler extends Thread {
 
                 Message message = new Message(messageType, payLoad);
 
-                if (message.getMessageType().equals(MessageType.HELO)) {
-                    Server.activeClients.replace(client, payLoad);
+                if (MessageType.HELO.equals(message.getMessageType())) {
+                    isValidated = Helo.handleServerMessage(payLoad, client);
+                    if (isValidated)
+                        clientInfo = new ClientInfo(client, payLoad);
                 }
 
-                handleMessage(message);
+                if (isValidated)
+                    handleMessage(message);
 
-//                writer.println(response.toString());
-//                writer.flush();
+                writer.flush();
 
 
 //
@@ -58,40 +60,6 @@ public class ClientHandler extends Thread {
 //                    queue.put(line);
 //                }
 //
-//                if (line.startsWith("HELO")) {
-//                    userName = line.substring(5, userName.length());
-//
-//                    if (Utils.validateUsername(userName)) {
-//                        if (Utils.nameIsUsed(userName)) {
-//                            writer.println("-ERR user already logged in");
-//                            writer.flush();
-//                        } else {
-//                            Utils.addUserName(userName);
-//                            String userHash = Utils.hashMessage(userName);
-//                            writer.println("+OK " + userHash);
-//                            writer.flush();
-//                        }
-//                    } else {
-//                        writer.println("-ERR username has an invalid format");
-//                        writer.flush();
-//                    }
-//
-//                }
-//
-//                if (line.toLowerCase().startsWith("dm")) {
-//                    writer.println("testetst");
-//                    writer.flush();
-//                }
-//
-//                if (line.toLowerCase().startsWith("quit")) {
-//                    writer.println("+OK Goodbye");
-//                    writer.flush();
-//                    Server.disconnect(client);
-//                    Utils.removeUsername(userName);
-//                    client.close();
-//                }
-//
-//                Server.sendToAll(line, client, userName);
             }
 
 
@@ -106,30 +74,29 @@ public class ClientHandler extends Thread {
         String payload = message.getPayload();
 
         switch(messageType) {
-            case HELO:
-                Message msg = Helo.handleServerMessage(payload);
-                writer.println(msg);
-                break;
             case BCST:
-                Broadcast.handleServerMessage(payload, client);
+                Broadcast.handleServerMessage(payload, clientInfo);
                 break;
             case USERS:
-                Users.handleServerMessage(client);
+                Users.handleServerMessage(clientInfo);
+                break;
             case DM:
-                DirectMessage.handleServerMessage(payload, client);
+                DirectMessage.handleServerMessage(payload, clientInfo);
                 break;
             case GETGROUPS:
-                GetGroups.handleServerMessage(client);
+                GetGroups.handleServerMessage(clientInfo);
                 break;
             case MKGROUP:
-                MakeGroup.handleServerMessage(payload, client);
+                MakeGroup.handleServerMessage(payload, clientInfo);
+                break;
+            case JOIN:
+                Join.handleServerMessage(payload, clientInfo);
                 break;
             case QUIT:
-                Quit.handleServerMessage(client);
+                Quit.handleServerMessage(clientInfo);
                 break;
         }
 
-        writer.flush();
     }
 
 }

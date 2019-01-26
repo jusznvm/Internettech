@@ -11,7 +11,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread {
     private Socket socket;
-    private int serverPort = 1337;
+    private int serverPort = 4444;
+    private boolean isValidated = false;
 
     public LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
@@ -58,30 +59,36 @@ public class Client extends Thread {
         @Override
         public void run() {
             try {
-                String welcomeLine = reader.readLine();
-
-                if (welcomeLine.contains((MessageType.HELO).toString())) {
-                    Message msg = new Message(MessageType.HELO.toString(), "");
-                    messages.put(msg);
-                }
+                do {
+                    isValidated = clientValidated();
+                } while (!isValidated);
 
                 do {
                     String line = reader.readLine();
                     System.out.println(line);
+                } while (isValidated);
 
-//                    String[] msgString = line.split(" ", 2);
-//
-//                    Message msg = new Message(msgString[0], msgString[1]);
-//                    msg.handleMessage();
-
-
-                } while (true);
-
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        private boolean clientValidated() {
+            try {
+                String line = reader.readLine();
+                System.out.println(line);
+
+                if (line.contains((MessageType.HELO).toString()) || line.contains((MessageType.ERR).toString())) {
+                    Message msg = new Message(MessageType.HELO.toString(), "");
+                    messages.put(msg);
+                } else if (line.contains((MessageType.OK).toString())) {
+                    return true;
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
     }
 
 
@@ -132,7 +139,7 @@ public class Client extends Thread {
             line = line.split(" ")[0];
 
             for (MessageType mt : MessageType.values()) {
-                if (line.contains(mt.toString().toLowerCase()))
+                if (line.equalsIgnoreCase(mt.toString().toLowerCase()))
                     return true;
             }
             return false;
