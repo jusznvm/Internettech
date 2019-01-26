@@ -1,177 +1,139 @@
 package client;
 
-import klient.MessageType;
-import utils.Utils;
+import message.Message;
+import message.MessageType;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
-import java.util.Stack;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class Client {
+public class Client extends Thread {
     private Socket socket;
+    private int serverPort = 4444;
 
-    boolean isConnected = false;
-    private int serverPort;
+    public LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
-    MessageWriter messageWriter;
-    MessageReader messageReader;
-
-    private Stack<ClientMessage> clientMessages;
-    private Stack<ServerMessage> serverMessages;
-
-    public Client(int port) {
-        this.serverPort = port;
-        this.clientMessages = new Stack<ClientMessage>();
-        this.serverMessages = new Stack<ServerMessage>();
+    public static void main(String[] args) {
+        new Client().start();
     }
 
     public void start() {
         try {
             this.socket = new Socket(InetAddress.getLocalHost(), serverPort);
+            System.out.println("Connected to chat server");
 
-            InputStream is = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            messageReader = new MessageReader(reader);
+            new ReadThread().start();
+            new WriteThread().start();
 
-            new Thread(messageReader).start();
+            while (messages.isEmpty()) {
+            }
 
-            OutputStream os = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(os);
-            messageWriter = new MessageWriter(writer);
-            new Thread(messageWriter).start();
-
-            while (serverMessages.empty()) {}
-
-            ServerMessage serverMessage = serverMessages.pop();
-            if (!serverMessage.getMessageType().equals(MessageType.HELO)) {
-                System.out.println("Expecting a HELO message but received: " + serverMessage.toString());
-            } else {
-                System.out.println("Please fill in your username: ");
-                Scanner sc = new Scanner(System.in);
-                String name = sc.nextLine();
-
-                ClientMessage heloMessage = new ClientMessage(MessageType.HELO, name);
-                clientMessages.push(heloMessage);
-
-                while (serverMessages.empty()) {}
-                isConnected = Utils.validateServerMessage(heloMessage, serverMessages.pop());
-                    while (isConnected) {
-                        if (!serverMessages.empty()) {
-                            ServerMessage received = (ServerMessage) serverMessages.pop();
-                            if (received.getMessageType().equals(MessageType.BCST)) {
-                                System.out.println(received.getPayload());
-                            }
-                        }
-                    }
-                }
-                disconnect();
-                System.out.println("Client disconnected!");
+            if (messages.peek().getMessageType().equals(MessageType.HELO))
+                System.out.println("Please enter your username :)))");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void disconnect() {
-        if (messageReader != null)
-            messageReader.kill();
-        if (messageWriter != null)
-            messageWriter.kill();
-        isConnected = false;
-    }
 
-    public class MessageReader implements Runnable {
+    public class ReadThread extends Thread {
         private BufferedReader reader;
-        private boolean isRunning = true;
 
-        public MessageReader(BufferedReader reader) {
-            this.reader = reader;
+        public ReadThread() {
+
+            try {
+                InputStream input = socket.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(input));
+            } catch (IOException ex) {
+                System.out.println("Error getting input stream: " + ex.getMessage());
+                ex.printStackTrace();
+            }
         }
 
         @Override
         public void run() {
+            try {
+                String welcomeLine = reader.readLine();
 
-            while(isRunning) {
-                try {
-                    String line = reader.readLine();
-                    System.out.println(">> " + line);
-                    ServerMessage message = new ServerMessage(line);
-                    if(message.getMessageType().equals(MessageType.PING)) {
-                        ClientMessage pongMessage = new ClientMessage(MessageType.PONG, "");
-                        clientMessages.push(pongMessage);
-                    }
-                    if (message.getMessageType().equals(MessageType.DSCN)) {
-                        System.out.println("Client disconnected by server.");
-                        Client.this.disconnect();
-                    }
-
-                    serverMessages.push(message);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (welcomeLine.contains((MessageType.HELO).toString())) {
+                    Message msg = new Message(MessageType.HELO.toString(), "");
+                    messages.put(msg);
                 }
 
+                do {
+                    String line = reader.readLine();
+                    System.out.println(line);
+
+//                    String[] msgString = line.split(" ", 2);
+//
+//                    Message msg = new Message(msgString[0], msgString[1]);
+//                    msg.handleMessage();
+
+
+                } while (reader.readLine() != null);
+
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
-        public void kill() {
-            isRunning = false;
-        }
     }
 
-    public class MessageWriter implements Runnable {
 
-        private boolean isRunning = true;
-        PrintWriter writer;
+    public class WriteThread extends Thread {
+        private PrintWriter writer;
 
-
-        public MessageWriter(final PrintWriter writer) {
-            this.writer = writer;
+        public WriteThread() {
+            try {
+                this.writer = new PrintWriter(socket.getOutputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void run() {
-            while (isRunning) {
+            Scanner sc = new Scanner(System.in);
 
-                BufferedReader bufReader = new BufferedReader(new InputStreamReader(System.in));
-                String line = null;
+            while (true) {
+                String line = sc.nextLine();
+                Message msg = messages.peek();
+
                 try {
-                    line = bufReader.readLine();
-                } catch (IOException e) {
+
+                    if (msg != null && msg.getMessageType().equals(MessageType.HELO)) {
+                        msg = messages.take();
+
+                        msg.setPayload(line);
+                    } else if (containsMessageType(line)) {
+                        String messageType = line.contains(" ") ? line.split(" ")[0] : line;
+                        String payLoad = line.split(" ", 2)[1];
+
+                        msg = new Message(messageType, payLoad);
+                    } else {
+                        msg = new Message("BCST", line);
+                    }
+
+                    writer.println(msg.toString());
+                    writer.flush();
+
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                ClientMessage clientMessage;
-
-                if (line != null) {
-                    if (line.equals("quit")) {
-                        clientMessage = new ClientMessage(MessageType.QUIT, "");
-                        isConnected = false;
-
-                        try {
-                            Thread.sleep(500L);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        clientMessage = new ClientMessage(MessageType.BCST, line);
-                    }
-                    writeToServer(clientMessage, writer);
-
-                    System.out.println("Type a broadcast message: ");
-                }
-
             }
         }
 
-        private void writeToServer(ClientMessage msg, final PrintWriter writer) {
-            System.out.println("<< " + msg);
-            writer.println(msg);
-            writer.flush();
-        }
+        private boolean containsMessageType(String line) {
+            line = line.split(" ")[0];
 
-        public void kill() {
-            isRunning = false;
+            for (MessageType mt : MessageType.values()) {
+                if (line.contains(mt.toString().toLowerCase()))
+                    return true;
+            }
+            return false;
         }
     }
 }

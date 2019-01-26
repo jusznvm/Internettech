@@ -1,7 +1,7 @@
 package utils;
 
 import client.ClientMessage;
-import klient.MessageType;
+import message.MessageType;
 import client.ServerMessage;
 
 import java.io.UnsupportedEncodingException;
@@ -25,7 +25,6 @@ public class Utils {
 
     public static boolean validateUsername(String userName) {
         Pattern p = Pattern.compile("[A-Za-z_0-9]+");
-        userName = userName.substring(5, userName.length());
         Matcher m = p.matcher(userName);
         return m.matches();
     }

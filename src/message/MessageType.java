@@ -1,4 +1,4 @@
-package klient;
+package message;
 
 public enum MessageType {
     HELO,
@@ -17,5 +17,5 @@ public enum MessageType {
     JOIN,
     SHOUT,
     LEAVE,
-    KICK;
+    KICK
 }

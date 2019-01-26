@@ -2,6 +2,7 @@ package klient;
 
 import client.ClientMessage;
 import client.ServerMessage;
+import message.MessageType;
 import utils.Utils;
 
 import java.io.*;
@@ -54,7 +55,7 @@ public class Client {
             String name = sc.nextLine();
 
             ClientMessage clientMessage = new ClientMessage(MessageType.HELO, name);
-            while(serverMessages.empty())
+            while(serverMessages.empty()) {}
             isConnected = Utils.validateServerMessage(clientMessage, serverMessages.pop());
 
             while(isConnected) {}
@@ -121,6 +122,7 @@ public class Client {
                     String line = clientMessages.pop().toString();
                     writer.println(line);
                     writer.flush();
+                    System.out.println("check");
                 }
             }
         }

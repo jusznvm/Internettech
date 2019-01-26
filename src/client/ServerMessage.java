@@ -1,6 +1,6 @@
 package client;
 
-import klient.MessageType;
+import message.MessageType;
 
 public class ServerMessage {
     private String line;

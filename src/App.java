@@ -1,4 +1,3 @@
-import client.Client;
 import server.Server;
 
 public class App {
