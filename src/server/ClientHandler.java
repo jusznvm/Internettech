@@ -120,15 +120,16 @@ public class ClientHandler extends Thread {
                 break;
             case GETGROUPS:
                 GetGroups.handleServerMessage(client);
+                break;
             case MKGROUP:
                 MakeGroup.handleServerMessage(payload, client);
+                break;
             case QUIT:
                 Quit.handleServerMessage(client);
                 break;
         }
 
         writer.flush();
-
     }
 
 }
