@@ -19,5 +19,6 @@ public enum MessageType {
     LEAVE,
     KICK,
     ENCRYPT,
-    DMFILE
+    DMFILE,
+    GETFILE
 }

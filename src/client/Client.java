@@ -2,6 +2,7 @@ package client;
 
 import message.Message;
 import message.MessageType;
+import server.Server;
 import utils.RSA;
 
 import java.io.*;
@@ -18,11 +19,16 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread {
     private Socket socket;
+    private Socket transferSocket;
+
     private final static int serverPort = 1337;
+    private final static int transferPort = 4444;
 
     private PublicKey publicKey;
     private PrivateKey privateKey;
     private String keyFileName;
+
+    private String username;
 
     public LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
@@ -48,6 +54,7 @@ public class Client extends Thread {
     public void start() {
         try {
             this.socket = new Socket(InetAddress.getLocalHost(), serverPort);
+
             System.out.println("Connected to chat server");
 
             new ReadThread().start();
@@ -88,15 +95,27 @@ public class Client extends Thread {
 
                 do {
                     String line = reader.readLine();
-                    if (line.startsWith("DMFILE")) {
-                        receiveFile(line);
-                        // Make object met de request details en reject/resolve
-                        // case reject
-                            // dont send
-                        // case resolve
-                            // start filetransferthread
+                    if (line.startsWith(MessageType.GETFILE.toString())) {
+                        if (line.contains("accepted")) {
+                            transferSocket = new Socket(InetAddress.getLocalHost(), transferPort);
 
-                        line = "A file has been received ! :)";
+                            PrintWriter transferHandlerWriter = new PrintWriter(transferSocket.getOutputStream());
+
+                            transferHandlerWriter.println(username);
+                            transferHandlerWriter.flush();
+
+                            String file = line.split(" ")[2];
+                            new SendFileHandler(file, transferSocket).run();
+                        } else if (line.contains("started")) {
+                            transferSocket = new Socket(InetAddress.getLocalHost(), transferPort);
+                            PrintWriter transferHandlerWriter = new PrintWriter(transferSocket.getOutputStream());
+
+                            transferHandlerWriter.println(username);
+                            transferHandlerWriter.flush();
+
+                            String fileType = line.split(" ")[2].split("\\.")[1];
+                            new ReceiveFileHandler(fileType, transferSocket).run();
+                        }
                     }
 
                     System.out.println(line);
@@ -134,16 +153,6 @@ public class Client extends Thread {
             }
             return false;
         }
-
-        private void receiveFile(String payload) throws IOException {
-            String message = payload.split(":")[1];
-            String type = payload.split(":")[0].split(" ")[1];
-            System.out.println("MESSAGE BELOW : \n" + message);
-            byte[] decoded = Base64.getDecoder().decode(message);
-
-            String fileName = new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + "." + type;
-            Files.write(Paths.get(fileName), decoded);
-        }
     }
 
     public class WriteThread extends Thread {
@@ -172,24 +181,16 @@ public class Client extends Thread {
                         msg.setPayload(line);
                         msg.setPublicKey(publicKey);
 
+                        username = line;
+
                     } else if (containsMessageType(line)) {
                         String messageType = line.contains(" ") ? line.split(" ")[0] : line;
                         String payLoad = "";
 
                         if (line.split(" ").length >= 2) {
                             payLoad = line.split(" ", 2)[1];
-
-                            if (messageType.equalsIgnoreCase(MessageType.DMFILE.toString())) {
-                                // 1 REQUEST DIE CONFIRMATIE
-                                // 1 REQUEST DIE FILE STUURT
-
-                            }
-
-                            if(messageType.equalsIgnoreCase(MessageType.DM.toString())) {
-
-                            }
-
                         }
+
                         msg = new Message(messageType, payLoad);
 
                     } else
@@ -202,20 +203,6 @@ public class Client extends Thread {
                     e.printStackTrace();
                 }
             }
-        }
-
-        private String sendFile(String payload) throws IOException {
-            String user = payload.split(" ")[0];
-            String filePath = payload.split(" ")[1];
-            String fileType = filePath.split("\\.")[1];
-
-            File file = new File(filePath);
-            byte[] bytes = Files.readAllBytes(file.toPath());
-            String encodedBytes = Base64.getEncoder().encodeToString(bytes);
-
-            String msg = fileType + ":" + encodedBytes;
-
-            return user + " " + msg;
         }
 
         private boolean containsMessageType(String line) {

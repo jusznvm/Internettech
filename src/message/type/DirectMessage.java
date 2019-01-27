@@ -1,6 +1,6 @@
 package message.type;
 
-import server.ClientInfo;
+import model.ClientInfo;
 import message.Message;
 import utils.Utils;
 

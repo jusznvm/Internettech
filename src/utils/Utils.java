@@ -1,7 +1,7 @@
 package utils;
 
-import server.ClientInfo;
-import message.MessageType;
+import model.ClientInfo;
+import model.TransferRequest;
 import server.Server;
 
 import java.io.UnsupportedEncodingException;
@@ -59,6 +59,15 @@ public class Utils {
     public static ClientInfo findUserFromActiveClients(Socket user){
         for (ClientInfo entry : Server.activeClients) {
             if (entry.getSocket().equals(user)) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    public static TransferRequest findTransferRequest(int id){
+        for (TransferRequest entry : Server.transferRequests) {
+            if (entry.getRequestId() == id) {
                 return entry;
             }
         }

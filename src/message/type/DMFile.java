@@ -1,7 +1,9 @@
 package message.type;
 
-import server.ClientInfo;
+import model.ClientInfo;
 import message.Message;
+import model.TransferRequest;
+import server.Server;
 import utils.Utils;
 
 import java.io.IOException;
@@ -13,36 +15,26 @@ public class DMFile extends Message {
         super(type, payload);
     }
 
-//    public static void handleServerMessage(String payload, ClientInfo client) {
-//
-//        PrintWriter writer;
-//        try {
-//            String userName = payload.split(" ")[0];
-//            String message = payload.split(" ")[1];
-//
-//            ClientInfo clientInfo = Utils.findUserFromActiveClients(userName);
-//            if (clientInfo != null) {
-//                writer = new PrintWriter(clientInfo.getSocket().getOutputStream());
-//                writer.println("DMFILE " + message);
-//                writer.flush();
-//            }
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     public static void handleServerMessage(String payload, ClientInfo client) {
         String userName = payload.split(" ")[0];
         String message = payload.split(" ")[1];
 
-        PrintWriter writer;
         try {
-            ClientInfo clientInfo = Utils.findUserFromActiveClients(userName);
+            PrintWriter clientWriter = new PrintWriter(client.getSocket().getOutputStream(), true);
 
-            if(clientInfo != null) {
-                writer = new PrintWriter(clientInfo.getSocket().getOutputStream(), true);
-                writer.println(client.getUserName() + " wants to send you a file with name: " + message);
+            ClientInfo recipient = Utils.findUserFromActiveClients(userName);
+
+            if (recipient != null) {
+                PrintWriter writer = new PrintWriter(recipient.getSocket().getOutputStream(), true);
+                clientWriter = new PrintWriter(client.getSocket().getOutputStream(), true);
+
+                TransferRequest request = new TransferRequest(client, recipient, message, Server.getTransferId());
+                Server.transferRequests.add(request);
+                
+                writer.println(client.getUserName() + " wants to send you " + message + ". Accept with 'GETFILE " + request.getRequestId() + "'");
+                clientWriter.println("OK request sent to " + recipient.getUserName());
+            } else {
+                clientWriter.println("ERR user not found");
             }
         } catch (IOException e) {
             e.printStackTrace();

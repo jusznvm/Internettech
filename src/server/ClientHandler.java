@@ -3,6 +3,7 @@ package server;
 import message.Message;
 import message.MessageType;
 import message.type.*;
+import model.ClientInfo;
 
 import java.io.*;
 import java.net.Socket;
@@ -54,13 +55,6 @@ public class ClientHandler extends Thread {
                     handleMessage(message);
 
                 writer.flush();
-
-
-//
-//                if (line.toLowerCase().contains("pong")) {
-//                    queue.put(line);
-//                }
-//
             }
 
 
@@ -104,6 +98,9 @@ public class ClientHandler extends Thread {
                 break;
             case DMFILE:
                 DMFile.handleServerMessage(payload, clientInfo);
+                break;
+            case GETFILE:
+                GetFile.handleServerMessage(payload, clientInfo);
                 break;
             case QUIT:
                 Quit.handleServerMessage(clientInfo);
