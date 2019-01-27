@@ -2,12 +2,14 @@ package client;
 
 import message.Message;
 import message.MessageType;
+import utils.RSA;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.*;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -18,10 +20,30 @@ public class Client extends Thread {
     private Socket socket;
     private final static int serverPort = 1337;
 
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
+    private String keyFileName;
+
+
     public LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
     public static void main(String[] args) {
         new Client().start();
+    }
+
+    public Client() {
+        try {
+            KeyPair keyPair = RSA.buildKeyPair();
+            this.publicKey = keyPair.getPublic();
+            this.privateKey = keyPair.getPrivate();
+
+            this.keyFileName = new SimpleDateFormat("HHmmss").format(new Date());
+
+            RSA.generateKeyFiles(privateKey, publicKey, keyFileName);
+            
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
 
