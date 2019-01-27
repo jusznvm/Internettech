@@ -1,4 +1,4 @@
-import server.Server;
+package server;
 
 public class App {
 

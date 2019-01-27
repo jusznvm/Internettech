@@ -1,6 +1,6 @@
 package message.type;
 
-import client.ClientInfo;
+import server.ClientInfo;
 import message.Message;
 import server.Server;
 

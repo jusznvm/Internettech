@@ -24,7 +24,6 @@ public class Client extends Thread {
     private PrivateKey privateKey;
     private String keyFileName;
 
-
     public LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
     public static void main(String[] args) {
@@ -38,7 +37,6 @@ public class Client extends Thread {
             this.privateKey = keyPair.getPrivate();
 
             this.keyFileName = new SimpleDateFormat("HHmmss").format(new Date());
-
             RSA.generateKeyFiles(privateKey, publicKey, keyFileName);
             
         } catch (NoSuchAlgorithmException e) {
@@ -66,7 +64,6 @@ public class Client extends Thread {
         }
     }
 
-
     public class ReadThread extends Thread {
         private BufferedReader reader;
         private boolean isValidated = false;
@@ -93,8 +90,15 @@ public class Client extends Thread {
                     String line = reader.readLine();
                     if (line.startsWith("DMFILE")) {
                         receiveFile(line);
+                        // Make object met de request details en reject/resolve
+                        // case reject
+                            // dont send
+                        // case resolve
+                            // start filetransferthread
+
                         line = "A file has been received ! :)";
                     }
+
                     System.out.println(line);
                 } while (isValidated);
 
@@ -176,12 +180,13 @@ public class Client extends Thread {
                             payLoad = line.split(" ", 2)[1];
 
                             if (messageType.equalsIgnoreCase(MessageType.DMFILE.toString())) {
-                                payLoad = sendFile(payLoad);
+                                // 1 REQUEST DIE CONFIRMATIE
+                                // 1 REQUEST DIE FILE STUURT
+
                             }
 
-                            if (messageType.equalsIgnoreCase(MessageType.DM.toString())) {
-                                // get recipient B publickey from server
-//                                payLoad = RSA.encrypt()
+                            if(messageType.equalsIgnoreCase(MessageType.DM.toString())) {
+
                             }
 
                         }

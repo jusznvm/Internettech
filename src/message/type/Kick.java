@@ -1,6 +1,6 @@
 package message.type;
 
-import client.ClientInfo;
+import server.ClientInfo;
 import message.Message;
 import server.Server;
 import utils.Utils;
@@ -18,6 +18,7 @@ public class Kick extends Message {
         String group = payload.split(" ")[0];
         String userToKick = payload.split(" ")[1];
 
+        // TODO: Error handling (in case someone enters two parameters instead of three.)
         ClientInfo clientToKick = Utils.findUserFromActiveClients(userToKick);
 
         try {

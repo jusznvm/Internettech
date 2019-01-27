@@ -1,9 +1,7 @@
 package utils;
 
-import client.ClientInfo;
-import client.ClientMessage;
+import server.ClientInfo;
 import message.MessageType;
-import client.ServerMessage;
 import server.Server;
 
 import java.io.UnsupportedEncodingException;
@@ -13,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

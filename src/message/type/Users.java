@@ -1,12 +1,11 @@
 package message.type;
 
-import client.ClientInfo;
+import server.ClientInfo;
 import message.Message;
 import server.Server;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.Socket;
 
 public class Users extends Message {
     public Users(String type, String payload) {

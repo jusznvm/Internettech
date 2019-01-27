@@ -1,4 +1,4 @@
-package client;
+package server;
 
 import java.math.BigInteger;
 import java.net.Socket;

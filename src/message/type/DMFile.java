@@ -1,10 +1,9 @@
 package message.type;
 
-import client.ClientInfo;
+import server.ClientInfo;
 import message.Message;
 import utils.Utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -31,6 +30,13 @@ public class DMFile extends Message {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void handleServerMessage(String payload, ClientInfo client) {
+        String userName = payload.split(" ")[0];
+
+        ClientInfo clientInfo = Utils.findUserFromActiveClients(userName);
+
     }
 
 }
