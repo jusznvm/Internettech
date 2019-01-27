@@ -7,6 +7,7 @@ import message.type.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.security.PublicKey;
 import java.util.concurrent.BlockingQueue;
 
 public class ClientHandler extends Thread {
@@ -44,9 +45,10 @@ public class ClientHandler extends Thread {
                 Message message = new Message(messageType, payLoad);
 
                 if (MessageType.HELO.equals(message.getMessageType())) {
-                    isValidated = Helo.handleServerMessage(payLoad, client);
+                    PublicKey publicKey = message.getPublicKey();
+                    isValidated = Helo.handleServerMessage(payLoad, client, publicKey);
                     if (isValidated)
-                        clientInfo = new ClientInfo(client, payLoad);
+                        clientInfo = new ClientInfo(client, payLoad, publicKey);
                 }
 
                 if (isValidated)

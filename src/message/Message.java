@@ -1,12 +1,21 @@
 package message;
 
+import java.security.PublicKey;
+
 public class Message {
     private MessageType messageType;
     private String payload;
+    private PublicKey publicKey;
 
     public Message(String type, String payload) {
         this.payload = payload;
         this.messageType = setMessageType(type);
+    }
+
+    public Message(String type, String payload, PublicKey publicKey) {
+        this.payload = payload;
+        this.messageType = setMessageType(type);
+        this.publicKey = publicKey;
     }
 
     public void setPayload(String payload) {
@@ -19,6 +28,14 @@ public class Message {
 
     public MessageType getMessageType() {
         return messageType;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
     }
 
     @Override

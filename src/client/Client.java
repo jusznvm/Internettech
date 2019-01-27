@@ -166,6 +166,7 @@ public class Client extends Thread {
                     if (msg != null && msg.getMessageType().equals(MessageType.HELO)) {
                         msg = messages.take();
                         msg.setPayload(line);
+                        msg.setPublicKey(publicKey);
 
                     } else if (containsMessageType(line)) {
                         String messageType = line.contains(" ") ? line.split(" ")[0] : line;
@@ -174,8 +175,13 @@ public class Client extends Thread {
                         if (line.split(" ").length >= 2) {
                             payLoad = line.split(" ", 2)[1];
 
-                            if (messageType.equals(MessageType.DMFILE.toString())) {
+                            if (messageType.equalsIgnoreCase(MessageType.DMFILE.toString())) {
                                 payLoad = sendFile(payLoad);
+                            }
+
+                            if (messageType.equalsIgnoreCase(MessageType.DM.toString())) {
+                                // get recipient B publickey from server
+//                                payLoad = RSA.encrypt()
                             }
 
                         }

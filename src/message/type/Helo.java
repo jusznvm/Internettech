@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 
 public class Helo extends Message {
 
@@ -17,7 +18,7 @@ public class Helo extends Message {
         super(type, payload);
     }
 
-    public static boolean handleServerMessage(String payload, Socket socket) {
+    public static boolean handleServerMessage(String payload, Socket socket, PublicKey publicKey) {
 
         try {
             PrintWriter writer = new PrintWriter(socket.getOutputStream());
@@ -36,7 +37,7 @@ public class Helo extends Message {
                     }
                     writer.println(new Message("OK", userHash).toString());
 
-                    ClientInfo clientInfo = new ClientInfo(socket, payload);
+                    ClientInfo clientInfo = new ClientInfo(socket, payload, publicKey);
                     Server.activeClients.add(clientInfo);
 
                     writer.flush();
