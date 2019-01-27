@@ -20,6 +20,7 @@ public class Users extends Message {
                 writer.println(info.getUserName());
             }
             writer.flush();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

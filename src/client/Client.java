@@ -6,6 +6,12 @@ import message.MessageType;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
+import java.util.Base64;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -65,6 +71,10 @@ public class Client extends Thread {
 
                 do {
                     String line = reader.readLine();
+                    if(line.startsWith("DMFILE")) {
+                        handleFile(line);
+                        line = "A file has been received ! :)";
+                    }
                     System.out.println(line);
                 } while (isValidated);
 
@@ -89,8 +99,17 @@ public class Client extends Thread {
             }
             return false;
         }
-    }
 
+        private void handleFile(String payload) throws IOException {
+            String message = payload.split(":")[1];
+            String type = payload.split(":")[0].split(" ")[1];
+            System.out.println("MESSAGE BELOW : \n" + message);
+            byte[] decoded = Base64.getDecoder().decode(message);
+
+            String fileName = new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + "." + type;
+            Files.write(Paths.get(fileName), decoded);
+        }
+    }
 
     public class WriteThread extends Thread {
         private PrintWriter writer;
@@ -121,9 +140,14 @@ public class Client extends Thread {
                         String messageType = line.contains(" ") ? line.split(" ")[0] : line;
                         String payLoad = "";
 
-                        if (line.split(" ").length >= 2)
+                        if (line.split(" ").length >= 2) {
                             payLoad = line.split(" ", 2)[1];
 
+                            if(messageType.equals(MessageType.DMFILE.toString())) {
+                                payLoad = handleFile(payLoad);
+                            }
+
+                        }
                         msg = new Message(messageType, payLoad);
 
                     } else
@@ -132,10 +156,24 @@ public class Client extends Thread {
                     writer.println(msg.toString());
                     writer.flush();
 
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | IOException e) {
                     e.printStackTrace();
                 }
             }
+        }
+
+        private String handleFile(String payload) throws IOException {
+            String user = payload.split(" ")[0];
+            String filePath = payload.split(" ")[1];
+            String fileType = filePath.split("\\.")[1];
+
+            File file = new File(filePath);
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            String encodedBytes = Base64.getEncoder().encodeToString(bytes);
+
+            String msg = fileType + ":" + encodedBytes;
+
+            return user + " " + msg;
         }
 
         private boolean containsMessageType(String line) {
@@ -149,11 +187,3 @@ public class Client extends Thread {
         }
     }
 }
-
-
-// do lees socket, while er berichten zijn
-// niet in 1 thread, keyboard input lezen & network input. Dus 2 verschillende threads ervoor
-// client heeft dus 2 threads.
-
-// keyboard:
-// bufferedreader = new inputstreamreader(inputStream in)

@@ -17,5 +17,6 @@ public enum MessageType {
     JOIN,
     SHOUT,
     LEAVE,
-    KICK
+    KICK,
+    DMFILE
 }

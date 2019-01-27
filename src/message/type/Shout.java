@@ -35,16 +35,19 @@ public class Shout extends Message {
                                 + client.getUserName() + ": "
                                 + message);
                         writer.flush();
+
                     }
                 } else {
                     writer = new PrintWriter(client.getSocket().getOutputStream());
                     writer.println("ERR : You're not part of this group.");
                     writer.flush();
+
                 }
             } else {
                 writer = new PrintWriter(client.getSocket().getOutputStream());
                 writer.println("ERR : Group not found.");
                 writer.flush();
+
             }
         } catch (IOException e) {
             e.printStackTrace();

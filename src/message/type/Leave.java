@@ -26,12 +26,14 @@ public class Leave extends Message {
                 if (Utils.isPartOfGroup(groupMembers, client.getUserName())) {
                     writer.println("OK : Succesfully left group.");
                     writer.flush();
+
                     groupMembers.remove(client);
 
                     for (ClientInfo info : groupMembers) {
                         writer = new PrintWriter(info.getSocket().getOutputStream());
                         writer.println("[" + payload + "]: " + client.getUserName() + " has left the group :(");
                         writer.flush();
+
                     }
                 }
                 else
@@ -41,6 +43,7 @@ public class Leave extends Message {
                 writer.println("ERR : Group not found !");
 
             writer.flush();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

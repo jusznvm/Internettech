@@ -33,6 +33,7 @@ public class MakeGroup extends Message {
             }
 
             writer.flush();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

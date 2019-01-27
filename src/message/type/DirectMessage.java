@@ -35,7 +35,6 @@ public class DirectMessage extends Message {
             }
 
             writer.flush();
-
         } catch (IOException e) {
             e.printStackTrace();
         }

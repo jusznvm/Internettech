@@ -29,6 +29,7 @@ public class Broadcast extends Message {
 
                 writer.flush();
 
+
             } catch (IOException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }

@@ -101,6 +101,9 @@ public class ClientHandler extends Thread {
             case LEAVE:
                 Leave.handleServerMessage(payload, clientInfo);
                 break;
+            case DMFILE:
+                DMFile.handleServerMessage(payload, clientInfo);
+                break;
             case QUIT:
                 Quit.handleServerMessage(clientInfo);
                 break;
