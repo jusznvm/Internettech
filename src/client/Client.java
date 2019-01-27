@@ -198,7 +198,7 @@ public class Client extends Thread {
                     writer.println(msg.toString());
                     writer.flush();
 
-                } catch (InterruptedException | IOException e) {
+                } catch (InterruptedException  e) {
                     e.printStackTrace();
                 }
             }
