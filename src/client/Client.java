@@ -8,7 +8,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -17,8 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread {
     private Socket socket;
-    private int serverPort = 4444;
-    private boolean isValidated = false;
+    private final static int serverPort = 1337;
 
     public LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
@@ -27,7 +25,6 @@ public class Client extends Thread {
     }
 
 
-    //TODO close client if server confirmed quit message with goodbye
     public void start() {
         try {
             this.socket = new Socket(InetAddress.getLocalHost(), serverPort);
@@ -50,6 +47,7 @@ public class Client extends Thread {
 
     public class ReadThread extends Thread {
         private BufferedReader reader;
+        private boolean isValidated = false;
 
         public ReadThread() {
 
@@ -66,13 +64,13 @@ public class Client extends Thread {
         public void run() {
             try {
                 do {
-                    isValidated = clientValidated();
+                    isValidated = isClientValidated();
                 } while (!isValidated);
 
                 do {
                     String line = reader.readLine();
-                    if(line.startsWith("DMFILE")) {
-                        handleFile(line);
+                    if (line.startsWith("DMFILE")) {
+                        receiveFile(line);
                         line = "A file has been received ! :)";
                     }
                     System.out.println(line);
@@ -83,7 +81,7 @@ public class Client extends Thread {
             }
         }
 
-        private boolean clientValidated() {
+        private boolean isClientValidated() {
             try {
                 String line = reader.readLine();
                 System.out.println(line);
@@ -92,6 +90,17 @@ public class Client extends Thread {
                     Message msg = new Message(MessageType.HELO.toString(), "");
                     messages.put(msg);
                 } else if (line.contains((MessageType.OK).toString())) {
+                    System.out.println("Welcome, you're successfully logged in! \n" +
+                            "The following commands are available: \n" +
+                            "USERS - returns a list of connected users \n" +
+                            "DM [username] [message] - private message an user \n" +
+                            "GETGROUPS - shows all groups \n" +
+                            "MKGROUP [groupname] - create a group \n" +
+                            "JOIN [groupname] - join a group \n" +
+                            "SHOUT [groupname] [message] - send a message to all users in the group \n" +
+                            "KICK [groupname] [user] - kick user from a group (group owner only!) \n" +
+                            "LEAVE [groupname] - leave a group \n" +
+                            "DMFILE [username] [filename.extension] - send a file, e.g. 'DMFILE user file.txt'");
                     return true;
                 }
             } catch (IOException | InterruptedException e) {
@@ -100,7 +109,7 @@ public class Client extends Thread {
             return false;
         }
 
-        private void handleFile(String payload) throws IOException {
+        private void receiveFile(String payload) throws IOException {
             String message = payload.split(":")[1];
             String type = payload.split(":")[0].split(" ")[1];
             System.out.println("MESSAGE BELOW : \n" + message);
@@ -143,8 +152,8 @@ public class Client extends Thread {
                         if (line.split(" ").length >= 2) {
                             payLoad = line.split(" ", 2)[1];
 
-                            if(messageType.equals(MessageType.DMFILE.toString())) {
-                                payLoad = handleFile(payLoad);
+                            if (messageType.equals(MessageType.DMFILE.toString())) {
+                                payLoad = sendFile(payLoad);
                             }
 
                         }
@@ -162,7 +171,7 @@ public class Client extends Thread {
             }
         }
 
-        private String handleFile(String payload) throws IOException {
+        private String sendFile(String payload) throws IOException {
             String user = payload.split(" ")[0];
             String filePath = payload.split(" ")[1];
             String fileType = filePath.split("\\.")[1];
